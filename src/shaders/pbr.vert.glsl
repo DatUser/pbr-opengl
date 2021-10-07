@@ -2,8 +2,8 @@
 
 precision highp float;
 
-in vec3 in_position;
-in vec3 in_normal;
+layout (location = 0) in vec3 in_position;
+layout (location = 1) in vec3 in_normal;
 
 uniform mat4 localToProjection;
 
@@ -17,10 +17,9 @@ main()
   vec3 cameraPos = vec3(0.0, 0.0, 4.0);
   vec3 modelPos = vec3(0.0, 0.0, 0.0);
 
-  vec4 positionLocal = vec4(in_position, 1.0);
-  gl_Position = localToProjection * positionLocal;
+  gl_Position = localToProjection * vec4(in_position, 1.0);
 
   worldPos = in_position.xyz;
-  vNormalWS = /*normalize(in_normal);*/normalize(worldPos - modelPos);
+  vNormalWS = normalize(in_normal);
   vviewDir = normalize(cameraPos - in_position.xyz);
 }

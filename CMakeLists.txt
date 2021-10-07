@@ -15,12 +15,12 @@ set(SRC
     "src/matrix.cc"
     "src/vector3.cc"
     "src/program.cc"
-    "src/tp1.cc")
+    "src/main.cc")
 
 
 # SETUP
 cmake_minimum_required(VERSION 3.12)
-project(tp1)
+project(main)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OPT_FLAGS} -Wall -Werror -Wextra -pedantic -fopenmp -lGL -lGLU -lglut -lGLEW")
@@ -33,11 +33,11 @@ endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Test")
     message("Test Mode")
-    add_executable(tp1)
-    target_sources(tp1 PRIVATE "tests/main.cc" ${SRC})
-    target_link_libraries(tp1 PRIVATE ${LIBRARIES})
+    add_executable(main)
+    target_sources(main PRIVATE "tests/main.cc" ${SRC})
+    target_link_libraries(main PRIVATE ${LIBRARIES})
 else()
-    add_executable(tp1)
-    target_sources(tp1 PRIVATE "src/tp1.cc" ${SRC})
-    target_link_libraries(tp1 PRIVATE ${LIBRARIES})
+    add_executable(main)
+    target_sources(main PRIVATE "src/main.cc" ${SRC})
+    target_link_libraries(main PRIVATE ${LIBRARIES})
 endif()

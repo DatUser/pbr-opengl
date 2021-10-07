@@ -1,8 +1,10 @@
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/quaternion_common.hpp>
 #include <glm/ext/vector_float3.hpp>
 #include <glm/fwd.hpp>
+#include <glm/matrix.hpp>
 #include <glm/trigonometric.hpp>
 #include <iostream>
 #include <GL/glew.h>
@@ -74,25 +76,17 @@ bool initGlut(int &argc, char* argv[])
 void init()
 {
   glEnable(GL_DEPTH_TEST);TEST_OPENGL_ERROR();
-  glDepthFunc(GL_ALWAYS);TEST_OPENGL_ERROR();
-
-  glEnable(GL_CULL_FACE);TEST_OPENGL_ERROR();
-  glCullFace(GL_FRONT);TEST_OPENGL_ERROR();
+  glDepthFunc(GL_LESS);TEST_OPENGL_ERROR();
 }
 
 void init_vbo(program::program* instance)
-{
+{if (!instance) return;
   Point3 center(0, 0, 0);
   Sphere s(center, 1);
 
   auto data = s.generate_vertices(500, 500);
   vertices = data.first;
   indices = data.second;
-  
-  GLint vertex_location =
-    glGetAttribLocation(instance->get_id(), "in_position");TEST_OPENGL_ERROR();
-  /*GLint normal_location =
-    glGetAttribLocation(instance->get_id(), "in_normal");TEST_OPENGL_ERROR();*/
 
   glGenVertexArrays(1, &VAO); TEST_OPENGL_ERROR();
   glGenBuffers(1, &VBO); TEST_OPENGL_ERROR();
@@ -107,31 +101,35 @@ void init_vbo(program::program* instance)
                &indices[0], GL_STATIC_DRAW); TEST_OPENGL_ERROR();
 
   // Vertex pos
-  glVertexAttribPointer(vertex_location, 3, GL_FLOAT, GL_FALSE,
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
       6 * sizeof(float), (void*)0); TEST_OPENGL_ERROR();
-  glEnableVertexAttribArray(vertex_location); TEST_OPENGL_ERROR();
+  glEnableVertexAttribArray(0); TEST_OPENGL_ERROR();
 
   // Vertex normal
-  /*glVertexAttribPointer(normal_location, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 
       (void*)(3 * sizeof(float)));TEST_OPENGL_ERROR();
-  glEnableVertexAttribArray(normal_location); TEST_OPENGL_ERROR();*/
+  glEnableVertexAttribArray(1); TEST_OPENGL_ERROR();
 
   glBindVertexArray(0);
 }
 
 void init_uniform(program::program* instance)
 {
+  glm::vec3 camPos = glm::vec3(0.0f, 0.0f, 4.0f);
+  glm::vec3 camUp = glm::vec3(0.0f, 1.0f, 0.0f);
+  glm::vec3 camFront = glm::vec3(0.0f, 0.0f, -1.0f);
+
+
   glm::mat4 proj = glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 100.0f); 
   glm::mat4 model = glm::mat4(1.0f);
-  glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 4.0f),
-				glm::vec3(0.0f, 0.0f, -1.0f),
-				glm::vec3(0.0f, 1.0f, 0.0f));
+  glm::mat4 view = glm::lookAt(camPos, camPos + camFront, camUp);
 
   glm::mat4 locToProj = proj * view * model;
 
   GLint projection_location =
     glGetUniformLocation(instance->get_id(), "localToProjection");TEST_OPENGL_ERROR();
-  glUniformMatrix4fv(projection_location, 1, GL_FALSE, &locToProj[0][0]);TEST_OPENGL_ERROR();
+  glUniformMatrix4fv(projection_location, 1, GL_FALSE, &locToProj[0][0]);
+  TEST_OPENGL_ERROR();
 }
 
 int main(int argc, char** argv)
