@@ -97,7 +97,7 @@ namespace program
     glLinkProgram(id);TEST_OPENGL_ERROR();
 
     GLint isLinked = 0;
-    glGetProgramiv(id, GL_LINK_STATUS, (int*) &isLinked);
+    glGetProgramiv(id, GL_LINK_STATUS, (int*) &isLinked); TEST_OPENGL_ERROR();
 
     //Check error
     if (isLinked != GL_TRUE)
@@ -120,8 +120,8 @@ namespace program
 	    infoLog.end()).c_str());
     }
 
-    /*glDetachShader(id, vertex_shader);
-    glDetachShader(id, fragment_shader);*/
+    //glDetachShader(id, vertex_shader); TEST_OPENGL_ERROR();
+    //glDetachShader(id, fragment_shader); TEST_OPENGL_ERROR();
   }
 
   void program::use()

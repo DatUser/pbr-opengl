@@ -21,6 +21,6 @@ main()
   gl_Position = localToProjection * positionLocal;
 
   worldPos = in_position.xyz;
-  vNormalWS = normalize(in_normal);//normalize(worldPos - modelPos);
+  vNormalWS = /*normalize(in_normal);*/normalize(worldPos - modelPos);
   vviewDir = normalize(cameraPos - in_position.xyz);
 }

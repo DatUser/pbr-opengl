@@ -35,7 +35,7 @@ GLuint EBO;
 
 void display()
 {
-  //glClearColor(0.0, 0.0, 0.0, 1.0);
+  //glClearColor(1.0, 0.0, 0.0, 1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);TEST_OPENGL_ERROR();
   //glMatrixMode(GL_MODELVIEW);
   //glLoadIdentity();
@@ -44,7 +44,7 @@ void display()
   glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);TEST_OPENGL_ERROR();
   glBindVertexArray(0);TEST_OPENGL_ERROR();
 
-  glutSwapBuffers();
+  glutSwapBuffers(); TEST_OPENGL_ERROR();
 }
 
 void resize(int width, int height)
@@ -91,8 +91,8 @@ void init_vbo(program::program* instance)
   
   GLint vertex_location =
     glGetAttribLocation(instance->get_id(), "in_position");TEST_OPENGL_ERROR();
-  GLint normal_location =
-    glGetAttribLocation(instance->get_id(), "in_normal");TEST_OPENGL_ERROR();
+  /*GLint normal_location =
+    glGetAttribLocation(instance->get_id(), "in_normal");TEST_OPENGL_ERROR();*/
 
   glGenVertexArrays(1, &VAO); TEST_OPENGL_ERROR();
   glGenBuffers(1, &VBO); TEST_OPENGL_ERROR();
@@ -112,21 +112,24 @@ void init_vbo(program::program* instance)
   glEnableVertexAttribArray(vertex_location); TEST_OPENGL_ERROR();
 
   // Vertex normal
-  glVertexAttribPointer(normal_location, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 
+  /*glVertexAttribPointer(normal_location, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 
       (void*)(3 * sizeof(float)));TEST_OPENGL_ERROR();
-  glEnableVertexAttribArray(normal_location); TEST_OPENGL_ERROR();
+  glEnableVertexAttribArray(normal_location); TEST_OPENGL_ERROR();*/
 
   glBindVertexArray(0);
+}
 
+void init_uniform(program::program* instance)
+{
   glm::mat4 proj = glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 100.0f); 
   glm::mat4 model = glm::mat4(1.0f);
-  glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 4),
-				glm::vec3(0,0,-1),
-				glm::vec3(0,1,0));
+  glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 4.0f),
+				glm::vec3(0.0f, 0.0f, -1.0f),
+				glm::vec3(0.0f, 1.0f, 0.0f));
 
   glm::mat4 locToProj = proj * view * model;
 
-  GLint64 projection_location =
+  GLint projection_location =
     glGetUniformLocation(instance->get_id(), "localToProjection");TEST_OPENGL_ERROR();
   glUniformMatrix4fv(projection_location, 1, GL_FALSE, &locToProj[0][0]);TEST_OPENGL_ERROR();
 }
@@ -146,9 +149,11 @@ int main(int argc, char** argv)
   std::string file_f("../src/shaders/pbr.frag.glsl");
   
   program::program* instance = program::program::make_program(file_v, file_f);
-  init_vbo(instance);
 
   instance->use();
+
+  init_vbo(instance);
+  init_uniform(instance);
 
   glutMainLoop();
 

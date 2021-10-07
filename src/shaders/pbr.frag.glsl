@@ -97,5 +97,5 @@ main()
   //vec3 color = L;// +ambient
 
   // **DO NOT** forget to apply gamma correction as last step.
-  outFragColor.rgba = vec4(L, 1.0);
+  outFragColor.rgba = vec4(albedo, 1.0);
 }
