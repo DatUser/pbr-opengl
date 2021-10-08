@@ -6,6 +6,7 @@ roughness and metalness of material.
 
 ## How to build and run
 
-```$ cmake -B build```
-```$ cd build && make -j```
-```$ ./main```
+```
+$ cmake -B build
+$ cd build && make -j
+$ ./main```
