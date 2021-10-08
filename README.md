@@ -9,4 +9,5 @@ roughness and metalness of material.
 ```
 $ cmake -B build
 $ cd build && make -j
-$ ./main```
+$ ./main
+```
