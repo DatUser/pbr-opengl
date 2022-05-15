@@ -9,14 +9,7 @@ include_directories(
 )
 
 # Searches for all .cc files
-set(SRC
-    "src/sphere.cc"
-    "src/camera.cc"
-    "src/matrix.cc"
-    "src/vector3.cc"
-    "src/program.cc"
-    "src/main.cc")
-
+file(GLOB_RECURSE SRC "src/*.cc")
 
 # SETUP
 cmake_minimum_required(VERSION 3.12)
@@ -39,5 +32,5 @@ if (CMAKE_BUILD_TYPE STREQUAL "Test")
 else()
     add_executable(main)
     target_sources(main PRIVATE "src/main.cc" ${SRC})
-    target_link_libraries(main PRIVATE ${LIBRARIES})
+    target_link_libraries(main ${LIBRARIES})
 endif()

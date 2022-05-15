@@ -15,12 +15,5 @@ out vec3 color;
 
 void main()
 {
-  vec3 cameraPos = vec3(0.0, 0.0, 4.0);
-  vec3 modelPos = vec3(0.0, 0.0, 0.0);
-
-  gl_Position = localToProjection * vec4(in_position, 1.0);
-
-  worldPos = in_position.xyz;
-  vNormalWS = normalize(in_normal);
-  vviewDir = normalize(cameraPos - in_position.xyz);
+  gl_Position = vec4(in_position, 1.0);
 }
