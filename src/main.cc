@@ -199,12 +199,18 @@ void init_quad()
 {
   //only needs to contain uvs
   std::vector<float> quad = {
-    -1.0, 1.0, 0.0, //Up left
+    -1.0, 1.0, 0.0, //Up left pos
+    0.0, 1.0, 0.0,  //UV
     1.0, 1.0, 0.0,  //Up right
+    1.0, 1.0, 0.0,  //UV
     1.0, -1.0, 0.0, //Down right
+    1.0, 0.0, 0.0,  //UV
     -1.0, 1.0, 0.0, //Up left
+    0.0, 1.0, 0.0,  //UV
     1.0, -1.0, 0.0, //Down right
-    -1.0, -1.0, 0.0 //Down left
+    1.0, 0.0, 0.0,  //UV
+    -1.0, -1.0, 0.0, //Down left
+    0.0, 0.0, 0.0  //UV
   };
 
   glGenVertexArrays(1, &VAO[2]); TEST_OPENGL_ERROR();
@@ -214,8 +220,11 @@ void init_quad()
   glBindBuffer(GL_ARRAY_BUFFER, VBO[2]); TEST_OPENGL_ERROR();
   glBufferData(GL_ARRAY_BUFFER, quad.size() * sizeof(float), quad.data(), GL_STATIC_DRAW); TEST_OPENGL_ERROR();
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) 0); TEST_OPENGL_ERROR();
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) 0); TEST_OPENGL_ERROR();
   glEnableVertexAttribArray(0); TEST_OPENGL_ERROR();
+
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) (3 * sizeof(float))); TEST_OPENGL_ERROR();
+  glEnableVertexAttribArray(1); TEST_OPENGL_ERROR();
 
   glBindBuffer(GL_ARRAY_BUFFER, 0); TEST_OPENGL_ERROR();
   glBindVertexArray(0); TEST_OPENGL_ERROR();
