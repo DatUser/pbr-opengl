@@ -39,33 +39,49 @@ GLuint VBO[3];
 GLuint VAO[3];//1: sphere | 2: cube | 3: quad (for screen in frag)
 GLuint EBO;
 
-GLuint FBO;
+GLuint gBuffer;
 
 GLuint idTexAlbedo;
+GLuint idTexSpecular;
 GLuint idTexNormal;
 
 program::program* instance;
 program::program* displayShader;
 
+
 void display()
 {
+  //Render
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);TEST_OPENGL_ERROR();
+
   //---------------------------
   //Pass information to gbuffer
   //---------------------------
-  /*glBindFramebuffer(GL_FRAMEBUFFER, FBO); TEST_OPENGL_ERROR();
+  glBindFramebuffer(GL_FRAMEBUFFER, gBuffer); TEST_OPENGL_ERROR();
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);TEST_OPENGL_ERROR();
   //glBindFragDataLocation(instance->get_id(), 0, "gAlbedo"); TEST_OPENGL_ERROR();
   //resize(WIDTH, HEIGHT);
 
-  //glClearColor(0.0, 0.0, 1.0, 1.0);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);TEST_OPENGL_ERROR();
+
+  //Clear color attachments
+  static const float clearColor[] = { 0.0f , 1.0f, 0.0f, 1.0f };
+  glClearTexImage(idTexAlbedo, 0, GL_RGBA/*8*/, GL_FLOAT/*UNSIGNED_BYTE*/, clearColor); TEST_OPENGL_ERROR();
+  glClearTexImage(idTexSpecular, 0, GL_RGBA/*8*/, GL_FLOAT/*UNSIGNED_BYTE*/, clearColor); TEST_OPENGL_ERROR();
+  glClearTexImage(idTexNormal, 0, GL_RGBA/*12*/, GL_FLOAT/*UNSIGNED_BYTE*/, clearColor); TEST_OPENGL_ERROR();
+
+  //Clear depth buffer (with 1.0 since we use GL_LESS)
+  //glClearDepth(1.0); TEST_OPENGL_ERROR();
+
+  //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);TEST_OPENGL_ERROR();
 
   instance->use();
   //glMatrixMode(GL_MODELVIEW);
   //glLoadIdentity();
   //
   instance->set_vec3("albedo", glm::vec3(1.0, 0.0, 0.0));
+  //glBindFramebuffer(GL_FRAMEBUFFER, )
   glBindVertexArray(VAO[0]);TEST_OPENGL_ERROR();
-  glEnableVertexArrayAttrib(VAO[0], 0);TEST_OPENGL_ERROR();
+  //glEnableVertexArrayAttrib(VAO[0], 0);TEST_OPENGL_ERROR();
   //Sphere draw
   glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);TEST_OPENGL_ERROR();
 
@@ -76,14 +92,19 @@ void display()
 
   glEnable(GL_DEPTH_TEST); TEST_OPENGL_ERROR();
 
-  glBindVertexArray(VAO[1]); TEST_OPENGL_ERROR();*/
-  //glDrawArrays(GL_TRIANGLES, 0, 30/*36*/); TEST_OPENGL_ERROR();
+  glBindVertexArray(VAO[1]); TEST_OPENGL_ERROR();
+  glDrawArrays(GL_TRIANGLES, 0, 30/*36*/); TEST_OPENGL_ERROR();
 
-  //glBindFramebuffer(GL_FRAMEBUFFER, 0); TEST_OPENGL_ERROR();
+  glBindFramebuffer(GL_FRAMEBUFFER, 0); TEST_OPENGL_ERROR();
   //---------------------------
   //Pass information to gbuffer
   //---------------------------
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);TEST_OPENGL_ERROR();
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+  glBlitFramebuffer(0, 0, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);TEST_OPENGL_ERROR();
   displayShader->use();
 
   //glEnable(GL_CULL_FACE); TEST_OPENGL_ERROR();
@@ -91,18 +112,14 @@ void display()
 
   glBindVertexArray(VAO[2]);TEST_OPENGL_ERROR();
   //glEnableVertexArrayAttrib(VAO[2], 0);TEST_OPENGL_ERROR();
+  glActiveTexture(GL_TEXTURE0); TEST_OPENGL_ERROR();
+  glBindTexture(GL_TEXTURE_2D, idTexAlbedo); TEST_OPENGL_ERROR();
+  glActiveTexture(GL_TEXTURE1); TEST_OPENGL_ERROR();
+  glBindTexture(GL_TEXTURE_2D, idTexSpecular); TEST_OPENGL_ERROR();
+  glActiveTexture(GL_TEXTURE2); TEST_OPENGL_ERROR();
+  glBindTexture(GL_TEXTURE_2D, idTexNormal); TEST_OPENGL_ERROR();
 
   glDrawArrays(GL_TRIANGLES, 0, 6);TEST_OPENGL_ERROR();
-
-  //glActiveTexture(GL_TEXTURE0); TEST_OPENGL_ERROR();
-  //glBindTexture(GL_TEXTURE_2D, idTexAlbedo); TEST_OPENGL_ERROR();
-  //glActiveTexture(GL_TEXTURE1); TEST_OPENGL_ERROR();
-  //glBindTexture(GL_TEXTURE_2D, idTexNormal); TEST_OPENGL_ERROR();
-
-  ////Copy Framebuffer data
-  //glBindFramebuffer(GL_READ_FRAMEBUFFER, FBO); TEST_OPENGL_ERROR();
-  //glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); TEST_OPENGL_ERROR();
-  //glBlitFramebuffer(0, 0, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST); TEST_OPENGL_ERROR();
 
   glutSwapBuffers(); TEST_OPENGL_ERROR();
 }
@@ -110,6 +127,7 @@ void display()
 void resize(int width, int height)
 {
   glViewport(0, 0, width, height);TEST_OPENGL_ERROR();
+  displayShader->set_vec2("screenSize", glm::vec2(WIDTH, HEIGHT));
 }
 
 bool initGlut(int &argc, char* argv[])
@@ -118,7 +136,7 @@ bool initGlut(int &argc, char* argv[])
   glutInitContextVersion(4, 5);TEST_OPENGL_ERROR();
   glutInitContextProfile(GLUT_CORE_PROFILE|GLUT_DEBUG);TEST_OPENGL_ERROR();
   glutInitDisplayMode(GLUT_RGBA|GLUT_DOUBLE|GLUT_DEPTH);TEST_OPENGL_ERROR();
-  glutInitWindowSize/*(WIDTH, HEIGHT)*/(1024, 1024);TEST_OPENGL_ERROR();
+  glutInitWindowSize(WIDTH, HEIGHT)/*(1024, 1024)*/;TEST_OPENGL_ERROR();
   glutInitWindowPosition(10, 10);TEST_OPENGL_ERROR();
   glutCreateWindow ("Test OpenGL−POGL");TEST_OPENGL_ERROR();
   glutDisplayFunc(display);TEST_OPENGL_ERROR();
@@ -133,8 +151,12 @@ bool initGlut(int &argc, char* argv[])
 
 void init()
 {
+  //Enable Depth Test
   glEnable(GL_DEPTH_TEST);TEST_OPENGL_ERROR();
-  glDepthFunc(GL_LESS);TEST_OPENGL_ERROR();
+  //glDepthFunc(GL_LESS); TEST_OPENGL_ERROR();
+
+  //Enable Depth Write
+  //glDepthMask(GL_TRUE); TEST_OPENGL_ERROR();
 }
 
 void init_vbo(program::program* instance)
@@ -248,32 +270,40 @@ void init_uniform(program::program* instance)
   glUniformMatrix4fv(projection_location, 1, GL_FALSE, &locToProj[0][0]);
   TEST_OPENGL_ERROR();
 }
-//@idFBO id framebuffer object
+//@idgBuffer id framebuffer object
 //@idTex id texture
 //@idRBO id render buffer(for depth map)
-void generate_fbo(GLuint* idFBO, GLuint* idRBO)
+void generate_gBuffer(GLuint* idgBuffer, GLuint* idRBO)
 {
-  glGenFramebuffers(1, idFBO); TEST_OPENGL_ERROR();
-  glBindFramebuffer(GL_FRAMEBUFFER, *idFBO); TEST_OPENGL_ERROR();
+  glGenFramebuffers(1, idgBuffer); TEST_OPENGL_ERROR();
+  glBindFramebuffer(GL_FRAMEBUFFER, *idgBuffer); TEST_OPENGL_ERROR();
 
   //Albedo buffer
   glGenTextures(1, &idTexAlbedo); TEST_OPENGL_ERROR();
-  glBindTexture(GL_TEXTURE_2D, idTexAlbedo);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, WIDTH, HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL); TEST_OPENGL_ERROR();
+  glBindTexture(GL_TEXTURE_2D, idTexAlbedo); TEST_OPENGL_ERROR();
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, WIDTH, HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL); TEST_OPENGL_ERROR();
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); TEST_OPENGL_ERROR();
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); TEST_OPENGL_ERROR();
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, idTexAlbedo, 0); TEST_OPENGL_ERROR();
 
-  //Normal buffer
-  glGenTextures(1, &idTexNormal); TEST_OPENGL_ERROR();
-  glBindTexture(GL_TEXTURE_2D, idTexNormal);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, WIDTH, HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL); TEST_OPENGL_ERROR();
+  //Specular buffer
+  glGenTextures(1, &idTexSpecular); TEST_OPENGL_ERROR();
+  glBindTexture(GL_TEXTURE_2D, idTexSpecular); TEST_OPENGL_ERROR();
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, WIDTH, HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL); TEST_OPENGL_ERROR();
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); TEST_OPENGL_ERROR();
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); TEST_OPENGL_ERROR();
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, idTexNormal, 0); TEST_OPENGL_ERROR();
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, idTexSpecular, 0); TEST_OPENGL_ERROR();
 
-  GLuint attachments[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
-  glDrawBuffers(2, attachments); TEST_OPENGL_ERROR();
+  //Normal buffer
+  glGenTextures(1, &idTexNormal); TEST_OPENGL_ERROR();
+  glBindTexture(GL_TEXTURE_2D, idTexNormal); TEST_OPENGL_ERROR();
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA12, WIDTH, HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL); TEST_OPENGL_ERROR();
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); TEST_OPENGL_ERROR();
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); TEST_OPENGL_ERROR();
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, idTexNormal, 0); TEST_OPENGL_ERROR();
+
+  GLuint attachments[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+  glDrawBuffers(3, attachments); TEST_OPENGL_ERROR();
 
   //Render buffer for depth
   glGenRenderbuffers(1, idRBO); TEST_OPENGL_ERROR();
@@ -282,7 +312,7 @@ void generate_fbo(GLuint* idFBO, GLuint* idRBO)
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, *idRBO); TEST_OPENGL_ERROR();
 
   if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-    std::cout << "Incomplete FBO" << std::endl;
+    std::cout << "Incomplete gBuffer" << std::endl;
 
   glBindFramebuffer(GL_FRAMEBUFFER, 0); TEST_OPENGL_ERROR();
 }
@@ -313,18 +343,18 @@ int main(int argc, char** argv)
   //-----------------------
   //Create buffer shader
   //-----------------------
-  //instance = program::program::make_program(vShaders);
+  instance = program::program::make_program(vShaders);
 
-  //instance->use();
+  instance->use();
 
-  ////Create frambuffer object
+  //Create frambuffer object
 
 
-  //init_vbo(instance);
-  //init_uniform(instance);
+  init_vbo(instance);
+  init_uniform(instance);
 
-  //GLuint idRBO;
-  //generate_fbo(&FBO, &idRBO);
+  GLuint idRBO;
+  generate_gBuffer(&gBuffer, &idRBO);
 
   //-----------------------
   //Create display shader

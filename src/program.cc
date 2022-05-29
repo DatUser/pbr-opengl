@@ -137,6 +137,12 @@ void program::set_float(const std::string &name, float value)
   glUniform1f(uniformId, value);
 }
 
+void program::set_vec2(const std::string &name, const glm::vec2 &value)
+{
+  GLint64 uniformId = glGetUniformLocation(id, name.c_str());
+  glUniform2fv(uniformId, 1, &value[0]);
+}
+
 void program::set_vec3(const std::string &name, const glm::vec3 &value)
 {
   GLint64 uniformId = glGetUniformLocation(id, name.c_str());
