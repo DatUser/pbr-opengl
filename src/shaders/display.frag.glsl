@@ -2,7 +2,6 @@
 
 precision highp float;
 
-uniform vec3 albedo;
 uniform vec2 screenSize;
 
 vec3 lightPos = vec3(2.0, 4.0, 4.0);
@@ -34,6 +33,6 @@ void main()
   //outColor = vec4(pos.xyz, 1.0);
   //outColor = vec4(normal, 1.0);
   //outColor = vec4(vec3(gl_FragCoord.z/gl_FragCoord.w), 1.0);
-  //outColor = vec4(vec3(depth), 1.0);
+  outColor = vec4(vec3(depth), 1.0);
   //outColor = vec4(vec3(texture(gSpecular, texCoord).w), 1.0);
 }

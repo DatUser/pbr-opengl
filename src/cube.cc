@@ -22,16 +22,16 @@ void Cube::generate()
     size, size,-size, //----BACK
     0.0, 0.0, 1.0,//
     1.0, 1.0, 1.0,//
-    -size,-size,-size,//
-    0.0, 0.0, 1.0,//
-    1.0, 1.0, 1.0,//
     -size, size,-size,//
     0.0, 0.0, 1.0,//
     1.0, 1.0, 1.0,//
-    size, size,-size,
+    -size,-size,-size,//
     0.0, 0.0, 1.0,//
     1.0, 1.0, 1.0,//
     size,-size,-size,
+    0.0, 0.0, 1.0,//
+    1.0, 1.0, 1.0,//
+    size, size,-size,
     0.0, 0.0, 1.0,//
     1.0, 1.0, 1.0,//
     -size,-size,-size,
@@ -40,16 +40,16 @@ void Cube::generate()
     -size,-size,-size,//----LEFT
     1.0, 0.0, 0.0,//
     1.0, 0.0, 0.0,//
-    -size,-size, size,//
-    1.0, 0.0, 0.0,//
-    1.0, 0.0, 0.0,//
     -size, size, size,//
     1.0, 0.0, 0.0,//
     1.0, 0.0, 0.0,//
-    -size,-size,-size,
+    -size,-size, size,//
     1.0, 0.0, 0.0,//
     1.0, 0.0, 0.0,//
     -size, size, size,
+    1.0, 0.0, 0.0,//
+    1.0, 0.0, 0.0,//
+    -size,-size,-size,
     1.0, 0.0, 0.0,//
     1.0, 0.0, 0.0,//
     -size, size,-size,//
@@ -58,16 +58,16 @@ void Cube::generate()
     size,-size, size,//----DOWN
     0.0, 1.0, 0.0,//
     1.0, 1.0, 1.0,//
-    -size,-size,-size,
-    0.0, 1.0, 0.0,//
-    1.0, 1.0, 1.0,//
     size,-size,-size,
     0.0, 1.0, 0.0,//
     1.0, 1.0, 1.0,//
-    size,-size, size,
+    -size,-size,-size,
     0.0, 1.0, 0.0,//
     1.0, 1.0, 1.0,//
     -size,-size, size,
+    0.0, 1.0, 0.0,//
+    1.0, 1.0, 1.0,//
+    size,-size, size,
     0.0, 1.0, 0.0,//
     1.0, 1.0, 1.0,//
     -size,-size,-size,
@@ -76,9 +76,6 @@ void Cube::generate()
     size, size, size,//---RIGHT
     -1.0, 0.0, 0.0,//
     0.0, 1.0, 0.0,//
-    size,-size,-size,
-    -1.0, 0.0, 0.0,//
-    0.0, 1.0, 0.0,//
     size, size,-size,
     -1.0, 0.0, 0.0,//
     0.0, 1.0, 0.0,//
@@ -86,6 +83,9 @@ void Cube::generate()
     -1.0, 0.0, 0.0,//
     0.0, 1.0, 0.0,//
     size, size, size,
+    -1.0, 0.0, 0.0,//
+    0.0, 1.0, 0.0,//
+    size,-size,-size,
     -1.0, 0.0, 0.0,//
     0.0, 1.0, 0.0,//
     size,-size, size,
@@ -94,6 +94,9 @@ void Cube::generate()
     size, size, size,//----UP
     0.0, -1.0, 0.0,//
     1.0, 1.0, 1.0,//
+    -size, size,-size,
+    0.0, -1.0, 0.0,//
+    1.0, 1.0, 1.0,//
     size, size,-size,
     0.0, -1.0, 0.0,//
     1.0, 1.0, 1.0,//
@@ -101,9 +104,6 @@ void Cube::generate()
     0.0, -1.0, 0.0,//
     1.0, 1.0, 1.0,//
     size, size, size,
-    0.0, -1.0, 0.0,//
-    1.0, 1.0, 1.0,//
-    -size, size,-size,
     0.0, -1.0, 0.0,//
     1.0, 1.0, 1.0,//
     -size, size, size,

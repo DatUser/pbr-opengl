@@ -59,7 +59,6 @@ void display()
   //---------------------------
   glBindFramebuffer(GL_FRAMEBUFFER, gBuffer); TEST_OPENGL_ERROR();
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);TEST_OPENGL_ERROR();
-  //glBindFragDataLocation(instance->get_id(), 0, "gAlbedo"); TEST_OPENGL_ERROR();
   //resize(WIDTH, HEIGHT);
 
 
@@ -70,28 +69,18 @@ void display()
   glClearTexImage(idTexNormal, 0, GL_RGBA/*12*/, GL_FLOAT/*UNSIGNED_BYTE*/, clearColor); TEST_OPENGL_ERROR();
 
   //Clear depth buffer (with 1.0 since we use GL_LESS)
-  //glClearDepth(1.0); TEST_OPENGL_ERROR();
-
-  //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);TEST_OPENGL_ERROR();
+  glClearDepth(1.0); TEST_OPENGL_ERROR();
 
   instance->use();
-  //glMatrixMode(GL_MODELVIEW);
-  //glLoadIdentity();
-  //
-  instance->set_vec3("albedo", glm::vec3(1.0, 0.0, 0.0));
-  //glBindFramebuffer(GL_FRAMEBUFFER, )
-  glBindVertexArray(VAO[0]);TEST_OPENGL_ERROR();
-  //glEnableVertexArrayAttrib(VAO[0], 0);TEST_OPENGL_ERROR();
+
+  //Set vertices reading order in triangle Counter-Clockwise
+  glFrontFace(GL_CCW); TEST_OPENGL_ERROR();
+
   //Sphere draw
+  glBindVertexArray(VAO[0]);TEST_OPENGL_ERROR();
   glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);TEST_OPENGL_ERROR();
 
   //Cube draw
-  instance->set_vec3("albedo", glm::vec3(1.0));
-  glEnable(GL_CULL_FACE); TEST_OPENGL_ERROR();
-  glFrontFace(GL_CW); TEST_OPENGL_ERROR();
-
-  glEnable(GL_DEPTH_TEST); TEST_OPENGL_ERROR();
-
   glBindVertexArray(VAO[1]); TEST_OPENGL_ERROR();
   glDrawArrays(GL_TRIANGLES, 0, 30/*36*/); TEST_OPENGL_ERROR();
 
@@ -104,14 +93,10 @@ void display()
 
   glBlitFramebuffer(0, 0, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);TEST_OPENGL_ERROR();
   displayShader->use();
 
-  //glEnable(GL_CULL_FACE); TEST_OPENGL_ERROR();
-  //glFrontFace(GL_CW); TEST_OPENGL_ERROR();
 
   glBindVertexArray(VAO[2]);TEST_OPENGL_ERROR();
-  //glEnableVertexArrayAttrib(VAO[2], 0);TEST_OPENGL_ERROR();
   glActiveTexture(GL_TEXTURE0); TEST_OPENGL_ERROR();
   glBindTexture(GL_TEXTURE_2D, idTexAlbedo); TEST_OPENGL_ERROR();
   glActiveTexture(GL_TEXTURE1); TEST_OPENGL_ERROR();
@@ -153,8 +138,9 @@ void init()
 {
   //Enable Depth Test
   glEnable(GL_DEPTH_TEST);TEST_OPENGL_ERROR();
-  //glDepthFunc(GL_LESS); TEST_OPENGL_ERROR();
+  glDepthFunc(GL_LESS); TEST_OPENGL_ERROR();
 
+  glEnable(GL_CULL_FACE); TEST_OPENGL_ERROR();
   //Enable Depth Write
   //glDepthMask(GL_TRUE); TEST_OPENGL_ERROR();
 }
@@ -228,16 +214,16 @@ void init_quad()
   std::vector<float> quad = {
     -1.0, 1.0, 0.0, //Up left pos
     0.0, 1.0, 0.0,  //UV
+    -1.0, -1.0, 0.0, //Down left
+    0.0, 0.0, 0.0,  //UV
+    1.0, -1.0, 0.0, //Down right
+    1.0, 0.0, 0.0,  //UV
+    1.0, -1.0, 0.0, //Down right
+    1.0, 0.0, 0.0,  //UV
     1.0, 1.0, 0.0,  //Up right
     1.0, 1.0, 0.0,  //UV
-    1.0, -1.0, 0.0, //Down right
-    1.0, 0.0, 0.0,  //UV
     -1.0, 1.0, 0.0, //Up left
-    0.0, 1.0, 0.0,  //UV
-    1.0, -1.0, 0.0, //Down right
-    1.0, 0.0, 0.0,  //UV
-    -1.0, -1.0, 0.0, //Down left
-    0.0, 0.0, 0.0  //UV
+    0.0, 1.0, 0.0  //UV
   };
 
   glGenVertexArrays(1, &VAO[2]); TEST_OPENGL_ERROR();
