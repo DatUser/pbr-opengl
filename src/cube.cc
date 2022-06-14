@@ -15,6 +15,9 @@ Cube::Cube(Point3& center, float size)
 */
 void Cube::generate()
 {
+  //POS
+  //NORMAL
+  //COLOR
   vertices = {
     size, size,-size, //----BACK
     0.0, 0.0, 1.0,//

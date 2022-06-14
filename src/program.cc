@@ -111,12 +111,12 @@ void program::create_program()
     // Delete program
     glDeleteProgram(id);
 
-    // Delete shaders
-    for (GLuint shader : shaders)
-      glDeleteShader(shader);
-
     errx(1, "Error creating program: %s", std::string(infoLog.begin(), infoLog.end()).c_str());
   }
+
+  // Delete shaders
+  for (GLuint shader : shaders)
+    glDeleteShader(shader);
 }
 
 void program::use()

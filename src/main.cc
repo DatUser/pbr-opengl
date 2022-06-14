@@ -182,13 +182,18 @@ void init_vbo(program::program* instance)
 
   // Vertex pos
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-      6 * sizeof(float), (void*)0); TEST_OPENGL_ERROR();
+      9 * sizeof(float), (void*)0); TEST_OPENGL_ERROR();
   glEnableVertexAttribArray(0); TEST_OPENGL_ERROR();
 
   // Vertex normal
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float),
       (void*)(3 * sizeof(float)));TEST_OPENGL_ERROR();
   glEnableVertexAttribArray(1); TEST_OPENGL_ERROR();
+
+  // Vertex color
+  glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float),
+      (void*)(6 * sizeof(float)));TEST_OPENGL_ERROR();
+  glEnableVertexAttribArray(2); TEST_OPENGL_ERROR();
 
   //--------------
   //Ground
@@ -258,12 +263,16 @@ void init_uniform(program::program* instance)
   glm::vec3 camUp = glm::vec3(0.0f, 1.0f, 0.0f);
   glm::vec3 camFront = glm::vec3(0.0f, 0.0f, -1.0f);
 
-
+  glm::vec2 zNearFar(0.1f, 12.0f);
   glm::mat4 proj = glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 100.0f);
   glm::mat4 model = glm::mat4(1.0f);
   glm::mat4 view = glm::lookAt(camPos, camPos + camFront, camUp);
 
-  glm::mat4 locToProj = proj * view * model;
+  glm::mat4 modelView = view * model;
+  glm::mat4 locToProj = proj * modelView;
+
+  instance->set_vec2("zNearFar", zNearFar);
+  instance->set_matrix4("modelView", modelView);
 
   GLint projection_location =
     glGetUniformLocation(instance->get_id(), "localToProjection");TEST_OPENGL_ERROR();
@@ -286,7 +295,7 @@ void generate_gBuffer(GLuint* idgBuffer, GLuint* idRBO)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); TEST_OPENGL_ERROR();
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, idTexAlbedo, 0); TEST_OPENGL_ERROR();
 
-  //Specular buffer
+  //Pos buffer
   glGenTextures(1, &idTexSpecular); TEST_OPENGL_ERROR();
   glBindTexture(GL_TEXTURE_2D, idTexSpecular); TEST_OPENGL_ERROR();
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, WIDTH, HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL); TEST_OPENGL_ERROR();
@@ -328,12 +337,12 @@ int main(int argc, char** argv)
 
   init();
 
-  std::string file_v = "../src/shaders/pbr.vert.glsl";
+  //std::string file_v = "../src/shaders/pbr.vert.glsl";
   //std::string file_f("../src/shaders/pbr.frag.glsl");
-  std::string file_f = "../src/shaders/color.frag.glsl";
+  //std::string file_f = "../src/shaders/color.frag.glsl";
 
   std::vector<std::pair<GLenum, std::string>> vShaders = {
-    { GL_VERTEX_SHADER, "../src/shaders/pbr.vert.glsl" },
+    { GL_VERTEX_SHADER, "../src/shaders/deferred.vert.glsl" },
     //{ GL_FRAGMENT_SHADER, "../src/shaders/color.frag.glsl" }
     //{ GL_FRAGMENT_SHADER, "../src/shaders/normal.frag.glsl" }
     { GL_FRAGMENT_SHADER, "../src/shaders/deferred.frag.glsl" }
@@ -371,6 +380,7 @@ int main(int argc, char** argv)
   glutMainLoop();
 
   delete instance;
+  delete displayShader;
 
   return 0;
 }

@@ -5,7 +5,7 @@ Sphere::Sphere(Point3& center, float radius)
 : center(center),
   radius(radius),
   normals(std::vector<float>{})
-{    
+{
 }
 
 /*
@@ -21,7 +21,7 @@ std::pair<std::vector<float>, std::vector<unsigned int>> Sphere::generate_vertic
     if (lines < 2 || cols < 3)
     {
         std::cerr << "Lines: " << lines << " | Cols: " << cols << std::endl
-                    << "Lines must bigger than 1 and Cols bigger than 2"; 
+                    << "Lines must bigger than 1 and Cols bigger than 2";
         return {verts, indices};
     }
 
@@ -32,6 +32,11 @@ std::pair<std::vector<float>, std::vector<unsigned int>> Sphere::generate_vertic
 
     //Top normal
     verts.push_back(0);
+    verts.push_back(1);
+    verts.push_back(0);
+
+    //Top color
+    verts.push_back(1);
     verts.push_back(1);
     verts.push_back(0);
 
@@ -53,18 +58,27 @@ std::pair<std::vector<float>, std::vector<unsigned int>> Sphere::generate_vertic
             verts.push_back(x);
             verts.push_back(y);
             verts.push_back(z);
+
+            verts.push_back(1);
+            verts.push_back(1);
+            verts.push_back(0);
         }
-        
-    }    
+
+    }
 
     //Bottom vertex
     verts.push_back(0);
     verts.push_back(-radius);
     verts.push_back(0);
-    
+
     //Bottom normal
     verts.push_back(0);
     verts.push_back(-1);
+    verts.push_back(0);
+
+    //Bottom color
+    verts.push_back(1);
+    verts.push_back(1);
     verts.push_back(0);
 
     //Top and Bot
@@ -94,7 +108,7 @@ std::pair<std::vector<float>, std::vector<unsigned int>> Sphere::generate_vertic
             unsigned int i1 = j0 + (i + 1) % cols;
             unsigned int i2 = j1 + (i + 1) % cols;
             unsigned int i3 = j1 + i;
-            
+
 
             indices.push_back(i0);
             indices.push_back(i1);
